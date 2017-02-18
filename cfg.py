@@ -1,7 +1,7 @@
 from capstone import *
 from capstone.x86 import *
 from pwnlib.elf import ELF
-import sys
+from BasicBlock import BasicBlock
 
 MAX_INST_LEN = 15
 NUM_REGS = 234
@@ -11,21 +11,6 @@ md.detail = True
 
 def op_str(op):
 	return '\t0x{:x}: {} {}'.format(op.address, op.mnemonic, op.op_str)
-
-class BasicBlock:
-	def __init__(self, insn=None):
-		self.in_blocks = []
-		self.out_blocks = []
-		self.insn = insn if insn else []
-
-	def start(self):
-		return self.insn[0]
-
-	def end(self):
-		return self.insn[-1]
-
-	def __repr__(self):
-		return 'BasicBlock({}, {}, {})'.format(self.insn, self.in_blocks, self.out_blocks)
 
 def build_basic_blocks(opgraph):
 	ops = [opgraph[addr] for addr in sorted(opgraph.keys())]
@@ -100,6 +85,8 @@ def print_cfg(cfg):
 				work_list.append(out_block)
 
 if __name__ == '__main__':
+	import sys
+	
 	if len(sys.argv) != 2:
 		print('Usage: {} <file>'.format(sys.argv[0]))
 		sys.exit()
