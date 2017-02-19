@@ -4,9 +4,11 @@ class BasicBlock:
 		self.out_blocks = []
 		self.insn = insn if insn else []
 
+	@property
 	def start(self):
 		return self.insn[0]
 
+	@property
 	def end(self):
 		return self.insn[-1]
 
