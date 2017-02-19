@@ -71,13 +71,12 @@ def op_str(op):
 class CFG:
 	def __init__(self, elf, start_addr):
 		self.start_addr = start_addr
-		self.cfg = construct_cfg(elf, start_addr)
-		self.blocks = build_basic_blocks(self.cfg)
+		self.ops = construct_cfg(elf, start_addr)
+		self.blocks = build_basic_blocks(self.ops)
 
-	def __getattr__(self, key):
-		if isinstance(key, int):
-			return self.cfg[key]
-		super.__getattr__(self, key)
+	def __getitem__(self, key):
+		if isinstance(key, (int, long)):
+			return self.ops[key]
 
 	@property
 	def start(self):
