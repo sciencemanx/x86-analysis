@@ -68,7 +68,7 @@ def build_basic_blocks(opgraph):
 def op_str(op):
 	return '\t0x{:x}: {} {}'.format(op.address, op.mnemonic, op.op_str)
 
-class CFG:
+class CFG(object):
 	def __init__(self, elf, start_addr):
 		self.start_addr = start_addr
 		self.ops = construct_cfg(elf, start_addr)
@@ -100,6 +100,7 @@ class CFG:
 			for out_block in block.out_blocks:
 				if out_block not in visited:
 					work_list.append(out_block)	
+
 
 if __name__ == '__main__':
 	import sys

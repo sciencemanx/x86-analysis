@@ -30,6 +30,7 @@ class EspAnalysis(ForwardAnalysis):
 			state -= 8
 		return state
 
+
 if __name__ == '__main__':
 	import sys
 
@@ -45,4 +46,3 @@ if __name__ == '__main__':
 	for op_addr in sorted(cfg.ops):
 		op = cfg.ops[op_addr]
 		print('{} -- esp = {}'.format(op_str(op), esp.before_states[op]))
-

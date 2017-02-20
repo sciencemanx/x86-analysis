@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-class ForwardAnalysis:
+class ForwardAnalysis(object):
 	def __init__(self, cfg, entry_state=None):
 		self.cfg = cfg
 		self.before_states = defaultdict(lambda: self.empty_state())
@@ -14,18 +14,16 @@ class ForwardAnalysis:
 
 		while len(work_list) > 0:
 			op = work_list.pop()
-			# print("op {} at addr {}".format(op, op.address))
 			in_state = self.before_states[op]
 			out_state = self.flow_func(in_state, op)
 			self.after_states[op] = out_state
 			for succ_addr in op.succs:
 				next_op = self.cfg[succ_addr]
-				# print("next op {} for addr {}".format(next_op, succ_addr))
 				next_state = self.before_states[next_op]
-				# print('merging {} and {}'.format(out_state, next_state))
 				merged = self.merge(out_state, next_state)
 				if merged != next_state:
-					work_list.append(next_op)
+					if next_op not in work_list:
+						work_list.append(next_op)
 					self.before_states[next_op] = merged
 
 	def empty_state(self):

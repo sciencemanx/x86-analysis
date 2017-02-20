@@ -1,4 +1,4 @@
-class BasicBlock:
+class BasicBlock(object):
 	def __init__(self, insn=None):
 		self.in_blocks = []
 		self.out_blocks = []
