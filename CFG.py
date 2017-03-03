@@ -99,7 +99,10 @@ class CFG(object):
 
 			for out_block in block.out_blocks:
 				if out_block not in visited:
-					work_list.append(out_block)	
+					work_list.append(out_block)
+
+	def __repr__(self):
+		return 'CFG(0x{:x})'.format(self.start_addr)
 
 
 if __name__ == '__main__':

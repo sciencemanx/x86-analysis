@@ -1,39 +1,10 @@
 from ForwardAnalysis import ForwardAnalysis
+from MachineState import MachineState, Immediate, StackPointer
 from CFG import CFG, op_str
 from pwnlib.elf import ELF
 from capstone.x86 import *
 from Enumeration import Enumeration
 from copy import deepcopy
-
-reg_dict = {globals()[d]:d.split('_')[-1] for d in dir() if 'X86_REG_' in d}
-def reg_str(reg):
-	return reg_dict[reg]
-
-op_ = None
-
-class StackPointer(object):
-	def __init__(self, addr=0):
-		self.addr = addr
-	def __eq__(self, other):
-		if isinstance(other, type(self)):
-			return self.addr == other.addr
-		return False
-	def __hash__(self):
-		return hash(self.addr)
-	def __repr__(self):
-		return 'SP({})'.format(self.addr)
-
-class NonPointer(object):
-	def __eq__(self, other):
-		return isinstance(other, type(self))
-	def __repr__(self): return 'NonPointer()'
-
-class Immediate(object):
-	def __init__(self, value):
-		self.value = value
-	def __eq__(self, other):
-		return isinstance(other, type(self)) and self.value == other.value
-	def __repr__(self): return 'Immediate({})'.format(self.value)
 
 class Unknown(object):
 	def __eq__(self, other):
@@ -57,41 +28,9 @@ def merge_dict(d1, d2, merge):
 		merged[key] = merge(d1[key], d2[key])
 	return merged
 
-class MachineState(object):
-	def __init__(self):
-		self.memory = {}
-		self.regs = {}
-	def __eq__(self, other):
-		if isinstance(other, type(self)):
-			return self.regs == other.regs and self.memory == other.memory
-		return False
-	def __ne__(self, other):
-		return not (self == other)
-	def __hash__(self):
-		return hash(self.addr)
-	def __repr__(self):
-		return "Machine(regs:{}, mem:{})".format(
-			{reg_str(r):v for r,v in self.regs.items()}, self.memory)
-	def store_value(self, operand, value):
-		if operand.type == X86_OP_REG:
-			self.regs[operand.reg] = value
-		if operand.type == X86_OP_MEM:
-			mem = operand.mem
-			base_addr = self.regs[mem.base].addr
-			addr = base_addr + mem.disp + (mem.index * mem.scale)
-			self.memory[StackPointer(addr)] = value
-	def read_value(self, operand):
-		if operand.type == X86_OP_IMM:
-			return Immediate(operand.imm)
-		if operand.type == X86_OP_REG:
-			return self.regs[operand.reg]
-		if operand.type == X86_OP_MEM:
-			mem = operand.mem
-			base_addr = self.regs[mem.base].addr
-			addr = base_addr + mem.disp + (mem.index * mem.scale)
-			return self.memory[StackPointer(addr)]
 
-class VariableAnalysis(ForwardAnalysis):
+
+class ConstantAnalysis(ForwardAnalysis):
 	def empty_state(self):
 		return MachineState()
 
@@ -99,7 +38,6 @@ class VariableAnalysis(ForwardAnalysis):
 		new_state = MachineState()
 		new_state.regs = merge_dict(s1.regs, s2.regs, merge_data)
 		new_state.memory = merge_dict(s1.memory, s2.memory, merge_data)
-		# print('merging {} and {} to {}'.format(s1, s2, new_state))
 		return new_state
 
 	def flow_func(self, state, op):
@@ -173,7 +111,7 @@ if __name__ == '__main__':
 	start = MachineState()
 	start.regs[X86_REG_RSP] = StackPointer(0)
 
-	vars = VariableAnalysis(cfg, entry_state=start)
+	vars = ConstantAnalysis(cfg, entry_state=start)
 	for op_addr in sorted(cfg.ops):
 		op = cfg.ops[op_addr]
 		print('{:120s} -- {}'.format(vars.before_states[op], op_str(op)))
