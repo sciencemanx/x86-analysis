@@ -10,6 +10,10 @@ class CallGraph(object):
 		self.calls = {} # maps call site to 'call dest'
 		self.construct()
 
+	def __getitem__(self, key):
+		if isinstance(key, (int, long)):
+			return self.cfgs[key]
+
 	def construct(self):
 		def extract_calls(cfg): # get all calls from cfg
 			calls = {}

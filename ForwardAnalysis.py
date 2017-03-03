@@ -1,4 +1,5 @@
 from collections import defaultdict
+from CFG import op_str
 
 class ForwardAnalysis(object):
 	def __init__(self, cfg, entry_state=None):
@@ -25,6 +26,16 @@ class ForwardAnalysis(object):
 					if next_op not in work_list:
 						work_list.append(next_op)
 					self.before_states[next_op] = merged
+
+	def __repr__(self):
+		return '{}(0x{:x})'.format(self.__class__.__name__, self.cfg.start_addr)
+
+	def show(self):
+		for op, state in sorted(self.before_states.items(), key=lambda x:x[0].address):
+			self.show_state(op, state)
+
+	def show_state(self, op, state):
+		print('{}: {}'.format(op_str(op), state))
 
 	def empty_state(self):
 		raise NotImplementedError

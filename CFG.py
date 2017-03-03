@@ -72,6 +72,7 @@ class CFG(object):
 	def __init__(self, elf, start_addr):
 		self.start_addr = start_addr
 		self.ops = construct_cfg(elf, start_addr)
+		self.end_addr = max(self.ops)
 		self.blocks = build_basic_blocks(self.ops)
 
 	def __getitem__(self, key):
@@ -81,6 +82,10 @@ class CFG(object):
 	@property
 	def start(self):
 		return self[self.start_addr]
+
+	@property
+	def end(self):
+		return self[self.end_addr]
 
 	@property
 	def start_block(self):
@@ -102,7 +107,7 @@ class CFG(object):
 					work_list.append(out_block)
 
 	def __repr__(self):
-		return 'CFG(0x{:x})'.format(self.start_addr)
+		return '{}(0x{:x})'.format(self.__class__.__name__, self.start_addr)
 
 
 if __name__ == '__main__':
